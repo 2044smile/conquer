@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "conquer"
+version = "0.1.0"
+description = ""
+authors = ["2044smile <2044smile@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.0.7"
+django-extensions = "^3.2.3"
+djangorestframework = "^3.15.2"
+pygments = "^2.18.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
