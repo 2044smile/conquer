@@ -17,8 +17,8 @@ class SnippetSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'code', 'linenos', 'language', 'style']
 ```
 ### APIView vs Mixin vs Generics
-- 커스터마이징이 많은 views 의 경우 APIView 사용하는 것이 좋다.
-- 간단한 CRUD 의 경우 Generics 사용하는 것이 좋다.
+- **커스터마이징이 많은 views 의 경우 APIView 사용하는 것이 좋다.**
+- **간단한 CRUD 의 경우 Generics 사용하는 것이 좋다.**
 #### APIView
   - 모든 HTTP 메서드를 직접 구현하여 세밀한 제어가 가능합니다.
   - 가장 유연하며, 요청과 응답을 세밀하게 제어할 수 있습니다.
