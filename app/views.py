@@ -1,11 +1,11 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from rest_framework import status, mixins, generics, permissions
+from rest_framework import status, mixins, generics, permissions, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, renderers
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.reverse import reverse
 
 from app.models import Snippet
@@ -13,46 +13,69 @@ from app.serializers import SnippetSerializer, UserSerializer
 from config.permissions import IsOwnerOrReadOnly
 
 
-class UserList(generics.ListAPIView):
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    this viewset automatically provides `list(리스트)`, `create`, `retrieve(상세)`, `update` and `destroy` actions.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class SnippetList(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
-    queryset = Snippet.objects.all()
-    serializer_class = SnippetSerializer
-
-    def perform_create(self, serializer):  # save() 메서드를 호출할 때 추가적인 인자를 전달할 수 있도록 perform_create() 메서드를 오버라이드합니다.
-        serializer.save(owner=self.request.user)  # 직렬화기 인스턴스에 owner 필드(owner=self.request.user)를 추가합니다.
-
-
-class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+    
+class SnippetViewSet(viewsets.ModelViewSet):
+    """
+    this viewset automatically provides `list(리스트)`, `create`, `retrieve(상세)`, `update` and `destroy` actions.
+    """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
-
-@api_view(['GET'])
-def api_root(request, format=None):
-    return Response({
-        'users': reverse('user-list', request=request, format=format),
-        'snippets': reverse('snippet-list', request=request, format=format),
-    })
-
-
-class SnippetHighlight(generics.GenericAPIView):
-    queryset = Snippet.objects.all()
-    renderer_classes = [renderers.StaticHTMLRenderer]
-
-    def get(self, request, *args, **kwargs):
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def highlight(self, request, *args, **kwargs):
         snippet = self.get_object()
-        return Response(snippet.highlighted)
+        return Response(snippet.highlighted)  # highlighted 는 models def save() 메서드에서 생성된 속성입니다.
+
+    def perform_create(self, serializer):  # save() 메서드를 호출할 때 추가적인 인자를 전달할 수 있도록 perform_create() 메서드를 오버라이드합니다.
+        serializer.save(owner=self.request.user)  # 직렬화기 인스턴스에 owner 필드(owner=self.request.user)를 추가합니다.
+
+# class UserList(generics.ListAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+
+
+# class UserDetail(generics.RetrieveAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+
+
+# class SnippetList(generics.ListCreateAPIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
+#     queryset = Snippet.objects.all()
+#     serializer_class = SnippetSerializer
+
+#     def perform_create(self, serializer):  # save() 메서드를 호출할 때 추가적인 인자를 전달할 수 있도록 perform_create() 메서드를 오버라이드합니다.
+#         serializer.save(owner=self.request.user)  # 직렬화기 인스턴스에 owner 필드(owner=self.request.user)를 추가합니다.
+
+
+# class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
+#     queryset = Snippet.objects.all()
+#     serializer_class = SnippetSerializer
+
+
+# class SnippetHighlight(generics.GenericAPIView):
+#     queryset = Snippet.objects.all()
+#     renderer_classes = [renderers.StaticHTMLRenderer]
+
+#     def get(self, request, *args, **kwargs):
+#         snippet = self.get_object()
+#         return Response(snippet.highlighted)
+
+# @api_view(['GET'])
+# def api_root(request, format=None):
+#     return Response({
+#         'users': reverse('user-list', request=request, format=format),
+#         'snippets': reverse('snippet-list', request=request, format=format),
+#     })
 
 # @csrf_exempt  # APIView 및 ViewSet 에서는 이 데코레이터를 사용할 필요가 없습니다.
 # @api_view(['GET', 'POST'])  # rest_framework.decorators.api_view 데코레이터를 사용하면 request 객체가 REST framework 의 Request 객체로 변환됩니다.
