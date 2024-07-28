@@ -2,6 +2,32 @@
 
 ## feat
 
+### Trade-offs between views vs VietSets
+  - ViewSet 장점
+    - Using ViewSets can be a really useful abstraction(추상화; 복잡한 시스템에서 중요한 부분만을 선택하여 단순하게 표현하는 과정 즉, 세부적인 구현이나 복잡한 내용을 숨기고, 사용자에게 필요한 기능이나 개념만을 드러내는 것)
+      - e.g) 운전자는 자동차를 운전하기 위해 엔진의 내부 작동 방식은 알 필요가 없습니다. 중요한 것은 핸들을 돌리면 방향이 바뀌고, 페달을 밟으면 속도가 조절된다는 점 입니다.
+    - API URL 규칙을 일관되도록 보장하는 데 도움이 됩니다.
+    - **작성해야 하는 코드의 양을 최소화**하고, URL 구성의 세부 사항보다는 API가 제공하는 상호 작용 및 표현에 집중할 수 있습니다.
+  - ViewSet 단점
+    - 초기 학습 곡선
+      - Django 의 기본 클래스 기반 뷰보다 복잡하다고 느낄 수 있습니다.
+    - 세부화된 제어 부족
+      - ViewSet은 기본 CRUD 작업을 자동으로 처리하기 때문에 세부적인 제어가 필요한 경우에는 불편할 수 있습니다.
+      - 특정한 액션에 대해 세밀하게 커스터마이징하려면 추가적인 코드가 필요합니다.
+    - URL 패턴의 복잡성
+      - ViewSet 을 사용하면 URL 라우팅이 자동으로 처리되지만, 복잡한 URL 패턴이 필요한 경우에는 직접 URL을 설정하는 것보다 더 복잡해질 수 있습니다.
+    - 조그만한 작업에는 ViewSet이 적합하지 않음
+      - e.g) 생성만 해야되는 엔드포인트에서 ViewSet 을 사용한다면 애매하다. 차라리 ListCreateView 나 이런 걸 사용하는 것이 복잡성도 줄이고, 시인성이 좋다고 생각한다.
+
+### ViewSet
+  - api_root 도 자동으로 생성한다.
+  - URL 도 DefaultRouter() 간편하게 사용 할 수 있다.
+
+### @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+  - action 데코레이터를 사용하여 사용자 정의 액션을 추가합니다. 
+  - detail=True 는 이 액션이 개별 객체에 대해 호출되어야 함을 나타냅니다. snippet/<pk>/highlight/
+  - detail=False 는 목록에 대해 호출되어야 함을 나타냅니다. snippet/highlight/
+
 ### 하이퍼링크
   - Django REST Framework(DRF) 의 하이퍼링크 필드는 객체 간의 관계를 나타낼 때 객체의 기본 키 (primary key) 대신 URI 를 사용하여 해당 객체의 위치를 나타냅니다. 이는 RESTful 원칙을 따르며, 클라이언트가 관련 리소스에 쉽게 접근하고 탐색할 수 있도록 도와줍니다.
   - 모델 간의 관계를 기본 키 대신 하이퍼링크(URI)로 표현합니다.
