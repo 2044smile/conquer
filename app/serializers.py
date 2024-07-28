@@ -6,18 +6,20 @@ from app.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
 class SnippetSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')  # owner 필드를 추가합니다. 클라이언트가 수정할 수 없도록 e.g) 프론트엔드 개발자
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')  # 하이퍼링크 필드를 추가합니다.
 
     class Meta:
         model = Snippet
-        fields = ['owner', 'id', 'title', 'code', 'linenos', 'language', 'style']
+        fields = ['url', 'id', 'highlight', 'owner', 'title', 'code', 'linenos', 'language', 'style']
 
 
 class UserSerializer(serializers.ModelSerializer):
-    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())  # 외래키 관계
+    # snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())  # 외래키 관계
+    snippets = serializers.HyperlinkedRelatedField(many=True, view_name='snippet-detail', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'snippets']  # snippets 필드를 추가합니다.
+        fields = ['url', 'id', 'username', 'snippets']  # snippets 필드를 추가합니다.
 
 # class SnippetSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)

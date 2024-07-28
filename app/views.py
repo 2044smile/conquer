@@ -1,12 +1,12 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from rest_framework import status, mixins, generics
+from rest_framework import status, mixins, generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser, renderers
 from rest_framework.decorators import api_view
-from rest_framework import permissions
+from rest_framework.reverse import reverse
 
 from app.models import Snippet
 from app.serializers import SnippetSerializer, UserSerializer
@@ -36,6 +36,23 @@ class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('user-list', request=request, format=format),
+        'snippets': reverse('snippet-list', request=request, format=format),
+    })
+
+
+class SnippetHighlight(generics.GenericAPIView):
+    queryset = Snippet.objects.all()
+    renderer_classes = [renderers.StaticHTMLRenderer]
+
+    def get(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
 
 # @csrf_exempt  # APIView 및 ViewSet 에서는 이 데코레이터를 사용할 필요가 없습니다.
 # @api_view(['GET', 'POST'])  # rest_framework.decorators.api_view 데코레이터를 사용하면 request 객체가 REST framework 의 Request 객체로 변환됩니다.
