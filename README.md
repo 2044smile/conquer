@@ -2,6 +2,29 @@
 
 ## feat
 
+### 하이퍼링크
+  - Django REST Framework(DRF) 의 하이퍼링크 필드는 객체 간의 관계를 나타낼 때 객체의 기본 키 (primary key) 대신 URI 를 사용하여 해당 객체의 위치를 나타냅니다. 이는 RESTful 원칙을 따르며, 클라이언트가 관련 리소스에 쉽게 접근하고 탐색할 수 있도록 도와줍니다.
+  - 모델 간의 관계를 기본 키 대신 하이퍼링크(URI)로 표현합니다.
+  - API 응답에 포함된 URL을 통해 관련 리소르를 쉽게 탐색할 수 있습니다.
+  - 서버가 자동으로 URL을 생성하여 응답에 포함시켜, 프런트엔드에서 별도의 URL 구성이 필요 없습니다.https://www.youtube.com/watch?v=t2dIZnyCl5k
+  ```python
+  [
+    {
+        "url": "http://example.com/users/1/",
+        "username": "john",
+        "snippets": [
+            "http://example.com/snippets/1/",
+            "http://example.com/snippets/2/"
+        ]
+    },
+    {
+        "url": "http://example.com/users/2/",
+        "username": "jane",
+        "snippets": []
+    }
+  ]
+  ```
+
 ### 직렬화, 역직렬화
   - Queryset -> Serializer -> JSON (직렬화)
   - JSON -> Serializer -> Queryset (역직렬화)
