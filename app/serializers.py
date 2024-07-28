@@ -1,11 +1,23 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
+
 from app.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
 
 class SnippetSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')  # owner 필드를 추가합니다. 클라이언트가 수정할 수 없도록 e.g) 프론트엔드 개발자
+
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'code', 'linenos', 'language', 'style']
+        fields = ['owner', 'id', 'title', 'code', 'linenos', 'language', 'style']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())  # 외래키 관계
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'snippets']  # snippets 필드를 추가합니다.
 
 # class SnippetSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)

@@ -1,14 +1,41 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 from rest_framework import status, mixins, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
+from rest_framework import permissions
 
 from app.models import Snippet
-from app.serializers import SnippetSerializer
+from app.serializers import SnippetSerializer, UserSerializer
+from config.permissions import IsOwnerOrReadOnly
 
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class SnippetList(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
+
+    def perform_create(self, serializer):  # save() 메서드를 호출할 때 추가적인 인자를 전달할 수 있도록 perform_create() 메서드를 오버라이드합니다.
+        serializer.save(owner=self.request.user)  # 직렬화기 인스턴스에 owner 필드(owner=self.request.user)를 추가합니다.
+
+
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]  # 인증된 사용자만 `수정`할 수 있도록 권한을 추가합니다.
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
 
 # @csrf_exempt  # APIView 및 ViewSet 에서는 이 데코레이터를 사용할 필요가 없습니다.
 # @api_view(['GET', 'POST'])  # rest_framework.decorators.api_view 데코레이터를 사용하면 request 객체가 REST framework 의 Request 객체로 변환됩니다.
@@ -51,11 +78,6 @@ from app.serializers import SnippetSerializer
 #     elif request.method == 'DELETE':
 #         snippet.delete()
 #         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-
-class SnippetList(generics.ListCreateAPIView):
-    queryset = Snippet.objects.all()
-    serializer_class = SnippetSerializer
 
 
 # class SnippetList(mixins.ListModelMixin, 
@@ -136,8 +158,3 @@ class SnippetList(generics.ListCreateAPIView):
     
 #     def delete(self, request, *args, **kwargs):
 #         return self.destroy(request, *args, **kwargs)
-
-
-class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Snippet.objects.all()
-    serializer_class = SnippetSerializer
